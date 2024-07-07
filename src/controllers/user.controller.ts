@@ -118,3 +118,40 @@ export const login = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const getUserById = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const user = await AppDataSource.getRepository(User).findOne({
+      where: {
+        userId: id,
+      },
+    });
+
+    if (user) {
+      return res
+        .json({
+          status: "success",
+          message: "user info gotten successfullly",
+          user: {
+            userId: user.userId,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            phone: user.phone,
+          },
+        })
+        .status(200);
+    } else {
+      throw new Error();
+    }
+  } catch (error) {
+    return res
+      .json({
+        status: "failed",
+        message: "Error getting user info",
+        statusCode: 404,
+      })
+      .status(200);
+  }
+};

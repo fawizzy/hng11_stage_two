@@ -1,6 +1,7 @@
 import { AppDataSource } from "./data-source";
 import express from "express";
 import userRoute from "./routes/user.route";
+import organisationRoute from "./routes/organisation.route";
 const app = express();
 const port = 3000;
 
@@ -12,7 +13,8 @@ AppDataSource.initialize()
   })
   .catch((error) => console.log(error));
 
-app.use("/auth", userRoute);
+app.use("/", userRoute);
+app.use(organisationRoute);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);

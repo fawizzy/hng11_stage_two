@@ -26,7 +26,7 @@ export class User {
   @Column()
   phone: string;
 
-  @ManyToMany(() => Organisation)
+  @ManyToMany(() => Organisation, (organisation) => organisation.users)
   @JoinTable()
   organisation: Organisation[];
 }
