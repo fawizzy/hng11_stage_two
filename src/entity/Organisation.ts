@@ -12,13 +12,12 @@ export class Organisation {
   @Column("uuid", { primary: true })
   orgId: string;
 
-  @Column({ nullable: false })
+  @Column("text", { nullable: false })
   name: string;
 
-  @Column({ nullable: true })
+  @Column("text", { nullable: true })
   description: string;
 
   @ManyToMany(() => User, (user) => user.organisation)
-  @JoinTable()
   users: User[];
 }

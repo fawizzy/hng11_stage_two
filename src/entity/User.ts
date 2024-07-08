@@ -11,19 +11,19 @@ export class User {
   @Column("uuid", { primary: true })
   userId: string;
 
-  @Column({ nullable: false })
+  @Column("text", { nullable: false })
   firstName: string;
 
-  @Column({ nullable: false })
+  @Column("text", { nullable: false })
   lastName: string;
 
-  @Column({ unique: true, nullable: false })
+  @Column("text", { unique: true, nullable: false })
   email: string;
 
-  @Column({ nullable: false })
+  @Column("text", { nullable: false })
   password: string;
 
-  @Column()
+  @Column("text", { nullable: true })
   phone: string;
 
   @ManyToMany(() => Organisation, (organisation) => organisation.users)

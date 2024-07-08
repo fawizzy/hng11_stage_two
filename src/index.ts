@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import { AppDataSource } from "./data-source";
 import express from "express";
 import userRoute from "./routes/user.route";
@@ -19,3 +20,5 @@ app.use(organisationRoute);
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
+
+export default app;
