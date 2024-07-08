@@ -34,7 +34,8 @@
     "zod": "^3.23.8"
   },
   "scripts": {
-    "start": "ts-node src/index.ts",
+    "start": "node build/index.js",
+    "build": "tsc",
     "typeorm": "typeorm-ts-node-commonjs",
     "test": "mocha -r tsx src/tests/**/*.spec.ts"
   }
