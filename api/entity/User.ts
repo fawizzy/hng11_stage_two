@@ -5,9 +5,9 @@ import {
   ManyToMany,
   JoinTable,
 } from "typeorm";
-import { Organisation } from "./Organisation";
-@Entity()
-export class User {
+import type { organisation } from "./Organisation";
+@Entity("user")
+export class user {
   @Column("uuid", { primary: true })
   userId: string;
 
@@ -26,7 +26,7 @@ export class User {
   @Column("text", { nullable: true })
   phone: string;
 
-  @ManyToMany(() => Organisation, (organisation) => organisation.users)
+  @ManyToMany("organisation", "user")
   @JoinTable()
-  organisation: Organisation[];
+  organisation: organisation[];
 }

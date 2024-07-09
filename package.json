@@ -18,6 +18,7 @@
   "dependencies": {
     "@vercel/node": "^3.2.1",
     "bcrypt": "^5.1.1",
+    "body-parser": "^1.20.2",
     "chai": "^5.1.1",
     "config": "^3.3.12",
     "dotenv": "^16.4.5",
@@ -34,8 +35,7 @@
     "zod": "^3.23.8"
   },
   "scripts": {
-    "start": "node build/index.js",
-    "build": "tsc",
+    "start": "ts-node api/index.ts",
     "typeorm": "typeorm-ts-node-commonjs",
     "test": "mocha -r tsx src/tests/**/*.spec.ts"
   }

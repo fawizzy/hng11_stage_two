@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import { AppDataSource } from "../data-source";
-import { Organisation } from "../entity/Organisation";
+import { organisation } from "../entity/Organisation";
 import * as jwt from "jsonwebtoken";
-import { User } from "../entity/User";
+import { user } from "../entity/User";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
 
@@ -13,8 +13,8 @@ export const getUserOrganisation = async (req: Request, res: Response) => {
     if (!userId) {
       throw new Error();
     }
-
-    const user = await AppDataSource.getRepository(User).findOne({
+    const userRepository = AppDataSource.getRepository(user);
+    const findUser = await userRepository.findOne({
       relations: {
         organisation: true,
       },
@@ -27,7 +27,7 @@ export const getUserOrganisation = async (req: Request, res: Response) => {
       status: "success",
       message: "<message>",
       data: {
-        organisations: user.organisation,
+        organisations: findUser.organisation,
       },
     });
   } catch (error) {
@@ -48,8 +48,8 @@ export const getOrganisationById = async (req: Request, res: Response) => {
     if (!userId) {
       throw new Error();
     }
-
-    const user = await AppDataSource.getRepository(User).findOne({
+    const userRepository = AppDataSource.getRepository(user);
+    const findUser = await userRepository.findOne({
       relations: {
         organisation: true,
       },
@@ -62,7 +62,9 @@ export const getOrganisationById = async (req: Request, res: Response) => {
       throw new Error();
     }
 
-    const organisation = user.organisation.find((org) => org.orgId === orgId);
+    const organisation = findUser.organisation.find(
+      (org) => org.orgId === orgId
+    );
 
     if (organisation) {
       res.statusCode = 200;
@@ -121,8 +123,8 @@ export const createOrganisation = async (req: Request, res: Response) => {
     if (!userId) {
       throw new Error();
     }
-
-    const user = await AppDataSource.getRepository(User).findOne({
+    const userRepository = AppDataSource.getRepository(user);
+    const findUser = await userRepository.findOne({
       relations: {
         organisation: true,
       },
@@ -135,15 +137,15 @@ export const createOrganisation = async (req: Request, res: Response) => {
       throw new Error();
     }
 
-    const newOrganisation = new Organisation();
+    const newOrganisation = new organisation();
     newOrganisation.orgId = uuidv4();
     newOrganisation.name = name;
     newOrganisation.description = description;
 
-    user.organisation.push(newOrganisation);
+    findUser.organisation.push(newOrganisation);
 
     await AppDataSource.manager.save(newOrganisation);
-    await AppDataSource.manager.save(user);
+    await AppDataSource.manager.save(findUser);
 
     if (newOrganisation) {
       res.statusCode = 201;
@@ -194,8 +196,8 @@ export const addUserOrganisation = async (req: Request, res: Response) => {
       res.statusCode = 422;
       return res.json({ errors: validationErrors });
     }
-
-    const user = await AppDataSource.getRepository(User).findOne({
+    const userRepository = AppDataSource.getRepository(user);
+    const findUser = await userRepository.findOne({
       relations: { organisation: true },
       where: {
         userId,
@@ -205,23 +207,21 @@ export const addUserOrganisation = async (req: Request, res: Response) => {
     if (!user) {
       throw new Error();
     }
-
-    const organisation = await AppDataSource.getRepository(
-      Organisation
-    ).findOne({
+    const organisationRepository = AppDataSource.getRepository(organisation);
+    const findOrganisation = await organisationRepository.findOne({
       where: {
         orgId,
       },
     });
 
-    console.log(user.organisation);
+    console.log(findUser.organisation);
 
     if (!organisation) {
       throw new Error();
     }
 
-    user.organisation.push(organisation);
-    await AppDataSource.manager.save(user);
+    findUser.organisation.push(findOrganisation);
+    await AppDataSource.manager.save(findUser);
     console.log(user);
     res.statusCode = 201;
     return res

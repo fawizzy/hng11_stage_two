@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { User } from "../entity/User";
+import { user } from "../entity/User";
 import * as jwt from "jsonwebtoken";
 
 const secretKey = process.env["secretKey"];
@@ -15,7 +15,7 @@ export const authMiddleWare = async (
       .status(401)
       .json({ status: "error", message: "Token is missing" });
   }
-  var decoded: User = jwt.verify(token, secretKey) as User;
+  var decoded: user = jwt.verify(token, secretKey) as user;
   req.userId = decoded.userId;
 
   next();

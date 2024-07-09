@@ -1,8 +1,7 @@
 import request from "supertest";
 import { expect } from "chai";
-import app from "../index";
-import { User } from "../entity/User";
-import { Organisation } from "../entity/Organisation";
+import { user } from "../entity/User";
+import { organisation } from "../entity/Organisation";
 import fetch from "node-fetch";
 
 const url = "http://localhost:3000";

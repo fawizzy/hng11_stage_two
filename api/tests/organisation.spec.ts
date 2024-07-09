@@ -1,10 +1,10 @@
 import { expect } from "chai";
-import { Organisation } from "../entity/Organisation";
-import { User } from "../entity/User";
+import { organisation } from "../entity/Organisation";
+import { user } from "../entity/User";
 
 describe("Organisation Access", () => {
   it("should not allow users to see data from organisations they don’t have access to", async () => {
-    const user: User = {
+    const user: user = {
       userId: "b3a17885-412b-4a9a-b527-706df380243b",
       email: "john.doe@example.com",
       firstName: "John",
@@ -14,7 +14,7 @@ describe("Organisation Access", () => {
       organisation: [],
     };
 
-    const org: Organisation = {
+    const org: organisation = {
       orgId: "33873d5e-6829-4e52-b0b9-f0b269976f9d",
       name: "John's Organisation",
       description: null,
@@ -23,7 +23,7 @@ describe("Organisation Access", () => {
 
     user.organisation.push(org);
 
-    const otherOrg: Organisation = {
+    const otherOrg: organisation = {
       orgId: "5b674b4e-4d53-4a65-bebe-75fdb8d1832a",
       name: "Jane's Organisation",
       description: null,

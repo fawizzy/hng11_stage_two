@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { AppDataSource } from "../data-source";
-import { Organisation } from "../entity/Organisation";
-import { User } from "../entity/User";
+import { organisation } from "../entity/Organisation";
+import { user } from "../entity/User";
 import sha1 from "sha1";
 import * as jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
@@ -13,6 +13,8 @@ export const registerUsers = async (req: Request, res: Response) => {
   try {
     const { firstName, lastName, email, password, phone } = req.body;
     console.log(req.body);
+    const userRepository = AppDataSource.getRepository(user);
+    const organisationRepository = AppDataSource.getRepository(organisation);
     const userSchema = z.object({
       firstName: z.string({
         required_error: "firstName is required",
@@ -46,16 +48,21 @@ export const registerUsers = async (req: Request, res: Response) => {
       return res.json({ errors: validationErrors }).status(422);
     }
 
-    const existingUser = await AppDataSource.getRepository(User).findOne({
+    const existingUser = await userRepository.findOne({
       where: {
         email,
       },
     });
-    console.log(existingUser);
+
+    // const existingUser = await AppDataSource.createQueryBuilder()
+    //   .select("user")
+    //   .from(user, "user")
+    //   .where("user.email = :email", { email })
+    //   .getOne();
     if (existingUser) {
       throw new Error();
     }
-    let newUser = new User();
+    let newUser = new user();
     newUser.userId = uuidv4();
     newUser.firstName = firstName;
     newUser.lastName = lastName;
@@ -63,38 +70,37 @@ export const registerUsers = async (req: Request, res: Response) => {
     newUser.email = email;
     newUser.password = sha1(password);
 
-    let newOrganisation = new Organisation();
+    let newOrganisation = new organisation();
     newOrganisation.orgId = uuidv4();
     newOrganisation.name = `${firstName}'s organisation`;
     await AppDataSource.manager.save(newOrganisation);
 
     newUser.organisation = [newOrganisation];
-    newUser = await AppDataSource.manager.save(newUser);
+    await AppDataSource.manager.save(newUser);
+    //await userRepository.save(newUser);
 
-    if (newUser) {
-      const token = jwt.sign(
-        { userId: newUser.userId, email: newUser.email },
-        secretKey,
-        { expiresIn: "1h" }
-      );
-      res.statusCode = 200;
-      return res
-        .json({
-          status: "success",
-          message: "Registration successful",
-          data: {
-            accessToken: token,
-            user: {
-              userId: newUser.userId,
-              firstName: newUser.firstName,
-              lastName: newUser.lastName,
-              email: newUser.email,
-              phone: newUser.phone,
-            },
+    const token = jwt.sign(
+      { userId: newUser.userId, email: newUser.email },
+      secretKey,
+      { expiresIn: "1h" }
+    );
+    res.statusCode = 200;
+    return res
+      .json({
+        status: "success",
+        message: "Registration successful",
+        data: {
+          accessToken: token,
+          user: {
+            userId: newUser.userId,
+            firstName: newUser.firstName,
+            lastName: newUser.lastName,
+            email: newUser.email,
+            phone: newUser.phone,
           },
-        })
-        .status(200);
-    }
+        },
+      })
+      .status(200);
   } catch (error) {
     console.log(error);
     res.statusCode = 400;
@@ -111,6 +117,7 @@ export const registerUsers = async (req: Request, res: Response) => {
 export const login = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
+    const userRepository = AppDataSource.getRepository(user);
     const loginSchema = z.object({
       email: z.string({
         required_error: "email is required",
@@ -137,7 +144,7 @@ export const login = async (req: Request, res: Response) => {
       res.statusCode = 422;
       return res.json({ errors: validationErrors }).status(422);
     }
-    const user = await AppDataSource.getRepository(User).findOne({
+    const findUser = await userRepository.findOne({
       where: {
         email,
         password: sha1(password),
@@ -146,7 +153,7 @@ export const login = async (req: Request, res: Response) => {
 
     if (user) {
       const token = jwt.sign(
-        { userId: user.userId, email: user.email },
+        { userId: findUser.userId, email: findUser.email },
         secretKey,
         { expiresIn: "1h" }
       );
@@ -158,11 +165,11 @@ export const login = async (req: Request, res: Response) => {
           data: {
             accessToken: token,
             user: {
-              userId: user.userId,
-              firstName: user.firstName,
-              lastName: user.lastName,
-              email: user.email,
-              phone: user.phone,
+              userId: findUser.userId,
+              firstName: findUser.firstName,
+              lastName: findUser.lastName,
+              email: findUser.email,
+              phone: findUser.phone,
             },
           },
         })
@@ -183,7 +190,8 @@ export const login = async (req: Request, res: Response) => {
 export const getUserById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params || req["userid"];
-    const user = await AppDataSource.getRepository(User).findOne({
+    const userRepository = AppDataSource.getRepository(user);
+    const findUser = await userRepository.findOne({
       where: {
         userId: id,
       },
@@ -195,11 +203,11 @@ export const getUserById = async (req: Request, res: Response) => {
           status: "success",
           message: "user info gotten successfullly",
           user: {
-            userId: user.userId,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            email: user.email,
-            phone: user.phone,
+            userId: findUser.userId,
+            firstName: findUser.firstName,
+            lastName: findUser.lastName,
+            email: findUser.email,
+            phone: findUser.phone,
           },
         })
         .status(200);
@@ -207,6 +215,7 @@ export const getUserById = async (req: Request, res: Response) => {
       throw new Error();
     }
   } catch (error) {
+    console.log(error);
     res.statusCode = 404;
     return res
       .json({
